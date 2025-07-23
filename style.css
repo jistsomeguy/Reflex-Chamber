@@ -1,0 +1,193 @@
+```css
+/* style.css */
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #0d0d0d;
+    color: #00ffff;
+    font-family: 'Roboto Mono', monospace;
+    overflow: hidden; /* Prevent scrollbars */
+    position: relative;
+}
+
+/* Subtle background animation */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(0,255,255,0.05) 0%, rgba(0,0,0,0) 70%);
+    animation: pulseBackground 15s infinite alternate;
+    z-index: -1;
+}
+
+@keyframes pulseBackground {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.2); opacity: 0.6; }
+}
+
+.container {
+    background-color: rgba(15, 15, 15, 0.9);
+    border: 1px solid #00ffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 0 25px rgba(0,255,255,0.4);
+    text-align: center;
+    max-width: 800px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    position: relative;
+    z-index: 1;
+}
+
+h1 {
+    font-size: 2.5em;
+    color: #00ffff;
+    text-shadow: 0 0 10px #00ffff;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 1.1em;
+    color: #a0f0f0;
+    margin-bottom: 20px;
+}
+
+.interaction-area {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.glyph-display, .vocal-loop-player {
+    background-color: rgba(30, 30, 30, 0.8);
+    border: 1px solid #00cccc;
+    border-radius: 8px;
+    padding: 20px;
+    flex: 1;
+    min-width: 280px; /* Ensure minimum width */
+    box-shadow: inset 0 0 10px rgba(0,204,204,0.3);
+}
+
+.glyph {
+    font-size: 4em;
+    color: #ff00ff; /* Magenta for glyphs */
+    text-shadow: 0 0 15px #ff00ff;
+    display: block;
+    margin-bottom: 15px;
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+
+.phrase-text {
+    font-size: 1.2em;
+    color: #a0f0f0;
+    min-height: 3em; /* Reserve space for text */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.control-btn {
+    background-color: #008888;
+    color: #fff;
+    border: 1px solid #00ffff;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1em;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    margin: 5px;
+}
+
+.control-btn:hover {
+    background-color: #00aaaa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,255,255,0.4);
+}
+
+.reflection-area {
+    background-color: rgba(30, 30, 30, 0.8);
+    border: 1px solid #00cccc;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: inset 0 0 10px rgba(0,204,204,0.3);
+}
+
+.reflection-area label {
+    font-size: 1.1em;
+    color: #00ffff;
+    text-align: left;
+}
+
+textarea {
+    width: calc(100% - 20px);
+    min-height: 100px;
+    background-color: #0a0a0a;
+    border: 1px solid #008888;
+    color: #00ff00; /* Green for input text */
+    padding: 10px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1em;
+    border-radius: 4px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+textarea:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 8px rgba(0,255,255,0.6);
+}
+
+.output-area {
+    background-color: #0a0a0a;
+    border: 1px dashed #008888;
+    color: #00ff00;
+    padding: 10px;
+    min-height: 50px;
+    text-align: left;
+    border-radius: 4px;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.info-area {
+    font-size: 0.9em;
+    color: #80f0f0;
+    margin-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .interaction-area {
+        flex-direction: column;
+        align-items: center;
+    }
+    .glyph-display, .vocal-loop-player {
+        width: 100%;
+        min-width: unset;
+    }
+    h1 {
+        font-size: 2em;
+    }
+    .subtitle {
+        font-size: 1em;
+    }
+}
+```javascript
