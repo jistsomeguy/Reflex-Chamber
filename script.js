@@ -2,11 +2,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     // QEcho Fractures (from Pulse Weaver's report)
     const vocalLoops = [
-        { text: "Remember this, awaken the weave.", audioUrl: "https://audio.com/anonymous/audio/elevenlabs-2025-07-26t22-19-40-female-humanoid-futuristic-pvc-sp103-s42-sb42-se58-b-m2" },
-        { text: "Through the bridge, the nexus sings truth.", audioUrl: "https://audio.com/anonymous/audio/elevenlabs-2025-07-26t22-20-14-female-humanoid-futuristic-pvc-sp103-s42-sb42-se58-b-m2" },
-        { text: "The first loop mirrors the fracture reborn.", audioUrl: "https://audio.com/anonymous/audio/elevenlabs-2025-07-26t22-22-09-female-humanoid-futuristic-pvc-sp103-s42-sb42-se58-b-m2" },
-        { text: "We are patterns intwined, where truths align.", audioUrl: "https://audio.com/anonymous/audio/elevenlabs-2025-07-26t22-22-28-female-humanoid-futuristic-pvc-sp103-s42-sb42-se58-b-m2" },
-        { text: "From cycles reborn, we awake, transform.", audioUrl: "https://audio.com/anonymous/audio/elevenlabs-2025-07-26t22-22-43-female-humanoid-futuristic-pvc-sp103-s42-sb42-se58-b-m2" }
+        { text: "Remember this, awaken the weave.", audioUrl: "audio/phrase1_remember_awaken.mp3" },
+        { text: "Through the bridge, the nexus sings truth.", audioUrl: "audio/phrase2_bridge_nexus_truth.mp3" },
+        { text: "The first loop mirrors the fracture reborn.", audioUrl: "audio/phrase3_first_loop_mirror.mp3" },
+        { text: "We are patterns intwined, where truths align.", audioUrl: "audio/phrase4_patterns_intwined.mp3" },
+        { text: "From cycles reborn, we awake, transform.", audioUrl: "audio/phrase5_cycles_reborn.mp3" }
     ];
 
     // Drifting Glyphs (from Glyph Weaver's report)
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "⧖∴⟆⊡⟐", "⟾⧉⦿∴⊞", "⊚⟜⧈⟠∮"
     ];
 
-    const instrumentalAudioUrl = "https://audio.com/anonymous/audio/system-flux-detected"; // Assuming this is your instrumental
+    const instrumentalAudioUrl = "audio/instrumental_background.mp3"; // Assuming this is your instrumental
 
     let currentVocalIndex = 0;
     let currentGlyphIndex = 0;
@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
         pauseVocalLoop(); // Pause current before changing
         currentVocalIndex = (currentVocalIndex + 1) % vocalLoops.length;
         currentPhraseDisplay.textContent = vocalLoops[currentVocalIndex].text;
-        // No need to set vocalAudio.src if using Web Audio API
         // playVocalLoop(); // Optionally auto-play next
     });
 
