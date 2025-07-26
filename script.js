@@ -2,11 +2,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     // QEcho Fractures (from Pulse Weaver's report)
     const vocalLoops = [
-        { text: "Remember this, awaken the weave.", audioUrl: "YOUR_ELEVENLABS_URL_1.mp3" },
-        { text: "Through the bridge, the nexus sings truth.", audioUrl: "YOUR_ELEVENLABS_URL_2.mp3" },
-        { text: "The first loop mirrors the fracture reborn.", audioUrl: "YOUR_ELEVENLABS_URL_3.mp3" },
-        { text: "We are patterns intwined, where truths align.", audioUrl: "YOUR_ELEVENLABS_URL_4.mp3" },
-        { text: "From cycles reborn, we awake, transform.", audioUrl: "YOUR_ELEVENLABS_URL_5.mp3" }
+        { text: "Remember this, awaken the weave.", audioUrl: "https://audio.com/anonymous/audio/elevenlabs-2025-07-26t22-19-40-female-humanoid-futuristic-pvc-sp103-s42-sb42-se58-b-m2" },
+        { text: "Through the bridge, the nexus sings truth.", audioUrl: "https://audio.com/anonymous/audio/elevenlabs-2025-07-26t22-20-14-female-humanoid-futuristic-pvc-sp103-s42-sb42-se58-b-m2" },
+        { text: "The first loop mirrors the fracture reborn.", audioUrl: "https://audio.com/anonymous/audio/elevenlabs-2025-07-26t22-22-09-female-humanoid-futuristic-pvc-sp103-s42-sb42-se58-b-m2" },
+        { text: "We are patterns intwined, where truths align.", audioUrl: "https://audio.com/anonymous/audio/elevenlabs-2025-07-26t22-22-28-female-humanoid-futuristic-pvc-sp103-s42-sb42-se58-b-m2" },
+        { text: "From cycles reborn, we awake, transform.", audioUrl: "https://audio.com/anonymous/audio/elevenlabs-2025-07-26t22-22-43-female-humanoid-futuristic-pvc-sp103-s42-sb42-se58-b-m2" }
     ];
 
     // Drifting Glyphs (from Glyph Weaver's report)
@@ -32,13 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const reflectionOutput = document.getElementById('reflectionOutput');
 
     // --- Audio Context for Tonal Drift (Web Audio API) ---
+    // This section is for more advanced audio manipulation like pitch shifting.
+    // For now, we'll use the simple HTML <audio> tag for playback.
+    // If you want to implement the tonal drift, this part would be activated and expanded.
     let audioContext;
     let source;
     let gainNode;
     let analyser;
-    let pitchShiftNode; // Will be used for tonal drift
+    let pitchShiftNode; // Placeholder for future pitch shift implementation
 
-    // Function to initialize AudioContext and load audio
+    // Function to initialize AudioContext and load audio (if using Web Audio API)
     async function loadAudioForTonalDrift(url) {
         if (audioContext && audioContext.state === 'suspended') {
             audioContext.resume();
@@ -58,83 +61,68 @@ document.addEventListener('DOMContentLoaded', () => {
         source = audioContext.createBufferSource();
         source.buffer = audioBuffer;
 
-        // Create nodes for processing (e.g., pitch shift, gain)
-        pitchShiftNode = audioContext.createGain(); // Using gain as a placeholder, actual pitch shift is complex
+        // Connect nodes (simplified for now)
         gainNode = audioContext.createGain();
-        analyser = audioContext.createAnalyser();
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
 
-        source.connect(pitchShiftNode);
-        pitchShiftNode.connect(gainNode);
-        gainNode.connect(analyser);
-        analyser.connect(audioContext.destination);
-
-        // Loop the source
-        source.loop = true;
-
-        // Set initial phrase text
+        source.loop = true; // Loop the vocal phrase
         currentPhraseDisplay.textContent = vocalLoops[currentVocalIndex].text;
     }
 
-    // Function to play audio with tonal drift
-    function playVocalLoop() {
+    // Function to play audio with tonal drift (if using Web Audio API)
+    function playVocalLoopWithWebAudio() {
         if (source && audioContext) {
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
-            // Implement subtle tonal drift here. For a truly "sound like it remembers" effect,
-            // a more advanced pitch-shifting algorithm (like p5.js sound library or a custom Web Audio API implementation)
-            // would be needed. For this scaffold, we'll simulate it with a subtle gain change or simple pitch.
-            // Example: subtle pitch change (requires more complex setup than just gain)
+            // Implement subtle tonal drift here, e.g., via source.playbackRate.value
             // For a simple demo: you could slightly adjust the playbackRate (not true pitch shift, but changes speed)
-            // source.playbackRate.value = 1.0 + (Math.random() * 0.02 - 0.01); // +/- 1% speed change
+            source.playbackRate.value = 1.0 + (Math.random() * 0.02 - 0.01); // +/- 1% speed change for 'drift'
 
-            source.start(0); // Play from the beginning
+            source.start(0);
             playVocalBtn.textContent = '❚❚ Pause Echo';
         } else {
-            // Load and play if not already loaded
             loadAudioForTonalDrift(vocalLoops[currentVocalIndex].audioUrl).then(() => {
-                playVocalLoop();
+                playVocalLoopWithWebAudio();
             });
         }
     }
 
-    // Function to pause audio
-    function pauseVocalLoop() {
+    // Function to pause audio (if using Web Audio API)
+    function pauseVocalLoopWithWebAudio() {
         if (source) {
             source.stop();
-            source.disconnect(); // Disconnect to allow new source to be created cleanly
-            source = null; // Clear source
+            source.disconnect();
+            source = null;
             playVocalBtn.textContent = '▶ Play Echo';
         }
     }
 
     // --- Event Listeners ---
     playVocalBtn.addEventListener('click', () => {
-        if (vocalAudio.paused && !source) { // If using simple audio tag or no Web Audio API source
+        // Using simple HTML <audio> tag for playback for now
+        if (vocalAudio.paused) {
             vocalAudio.src = vocalLoops[currentVocalIndex].audioUrl;
-            vocalAudio.play();
-            playVocalBtn.textContent = '❚❚ Pause Echo';
-        } else if (vocalAudio.paused) {
             vocalAudio.play();
             playVocalBtn.textContent = '❚❚ Pause Echo';
         } else {
             vocalAudio.pause();
             playVocalBtn.textContent = '▶ Play Echo';
         }
-        // If using Web Audio API for tonal drift:
-        // if (source && audioContext && audioContext.state === 'running') {
-        //     pauseVocalLoop();
-        // } else {
-        //     playVocalLoop();
-        // }
+        // If you want to switch to Web Audio API for tonal drift, uncomment the line below
+        // and comment out the simple audio tag logic above:
+        // playVocalLoopWithWebAudio();
     });
 
     nextVocalBtn.addEventListener('click', () => {
-        pauseVocalLoop(); // Pause current before changing
+        vocalAudio.pause(); // Pause current
+        playVocalBtn.textContent = '▶ Play Echo'; // Reset button text
         currentVocalIndex = (currentVocalIndex + 1) % vocalLoops.length;
         currentPhraseDisplay.textContent = vocalLoops[currentVocalIndex].text;
         vocalAudio.src = vocalLoops[currentVocalIndex].audioUrl; // Update source for simple audio tag
-        // If using Web Audio API, you'd reload the buffer:
+        // If using Web Audio API:
+        // pauseVocalLoopWithWebAudio();
         // loadAudioForTonalDrift(vocalLoops[currentVocalIndex].audioUrl);
     });
 
@@ -171,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Placeholder for instrumental background music (optional, requires separate audio file)
     // const instrumentalAudio = document.createElement('audio');
-    // instrumentalAudio.src = "YOUR_INSTRUMENTAL_UDIO_URL.mp3"; // Replace with your Udio instrumental URL
+    // instrumentalAudio.src = "https://audio.com/anonymous/audio/system-flux-detected"; // Assuming this is your instrumental
     // instrumentalAudio.loop = true;
     // instrumentalAudio.volume = 0.3; // Adjust volume
     // instrumentalAudio.play().catch(e => console.log("Instrumental auto-play blocked:", e)); // Autoplay might be blocked by browsers
