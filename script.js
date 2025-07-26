@@ -16,10 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
         "⧖∴⟆⊡⟐", "⟾⧉⦿∴⊞", "⊚⟜⧈⟠∮"
     ];
 
+    const instrumentalAudioUrl = "https://audio.com/anonymous/audio/system-flux-detected"; // Assuming this is your instrumental
+
     let currentVocalIndex = 0;
     let currentGlyphIndex = 0;
 
-    const vocalAudio = document.getElementById('vocalAudio');
     const playVocalBtn = document.getElementById('playVocalBtn');
     const nextVocalBtn = document.getElementById('nextVocalBtn');
     const currentPhraseDisplay = document.getElementById('currentPhrase');
@@ -31,99 +32,115 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitReflectionBtn = document.getElementById('submitReflectionBtn');
     const reflectionOutput = document.getElementById('reflectionOutput');
 
-    // --- Audio Context for Tonal Drift (Web Audio API) ---
-    // This section is for more advanced audio manipulation like pitch shifting.
-    // For now, we'll use the simple HTML <audio> tag for playback.
-    // If you want to implement the tonal drift, this part would be activated and expanded.
+    // --- Web Audio API for controlled playback and effects ---
     let audioContext;
-    let source;
-    let gainNode;
-    let analyser;
-    let pitchShiftNode; // Placeholder for future pitch shift implementation
+    let vocalBufferSource = null; // Source for vocal loops
+    let instrumentalBufferSource = null; // Source for instrumental background
+    let vocalGainNode;
+    let instrumentalGainNode;
 
-    // Function to initialize AudioContext and load audio (if using Web Audio API)
-    async function loadAudioForTonalDrift(url) {
-        if (audioContext && audioContext.state === 'suspended') {
-            audioContext.resume();
-        } else if (!audioContext) {
+    // Function to initialize AudioContext
+    function initAudioContext() {
+        if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            vocalGainNode = audioContext.createGain();
+            instrumentalGainNode = audioContext.createGain();
+            vocalGainNode.connect(audioContext.destination);
+            instrumentalGainNode.connect(audioContext.destination);
+            instrumentalGainNode.gain.value = 0.3; // Set initial volume for instrumental
         }
-
-        if (source) {
-            source.stop(); // Stop previous source if any
-            source.disconnect();
+        // Resume context if suspended (common browser policy)
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
         }
+    }
 
+    // Function to load an audio file into an AudioBuffer
+    async function loadAudioBuffer(url) {
+        initAudioContext(); // Ensure context is initialized
         const response = await fetch(url);
         const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-        source = audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-
-        // Connect nodes (simplified for now)
-        gainNode = audioContext.createGain();
-        source.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        source.loop = true; // Loop the vocal phrase
-        currentPhraseDisplay.textContent = vocalLoops[currentVocalIndex].text;
+        return await audioContext.decodeAudioData(arrayBuffer);
     }
 
-    // Function to play audio with tonal drift (if using Web Audio API)
-    function playVocalLoopWithWebAudio() {
-        if (source && audioContext) {
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            // Implement subtle tonal drift here, e.g., via source.playbackRate.value
-            // For a simple demo: you could slightly adjust the playbackRate (not true pitch shift, but changes speed)
-            source.playbackRate.value = 1.0 + (Math.random() * 0.02 - 0.01); // +/- 1% speed change for 'drift'
+    // Function to play a vocal loop
+    async function playVocalLoop() {
+        initAudioContext(); // Ensure context is initialized and resumed
 
-            source.start(0);
+        if (vocalBufferSource) {
+            vocalBufferSource.stop();
+            vocalBufferSource.disconnect();
+            vocalBufferSource = null;
+        }
+
+        try {
+            const audioBuffer = await loadAudioBuffer(vocalLoops[currentVocalIndex].audioUrl);
+            vocalBufferSource = audioContext.createBufferSource();
+            vocalBufferSource.buffer = audioBuffer;
+
+            // Apply subtle tonal drift (playbackRate changes speed, but gives a 'drift' feel)
+            vocalBufferSource.playbackRate.value = 1.0 + (Math.random() * 0.02 - 0.01); // +/- 1% speed change for 'drift'
+
+            vocalBufferSource.connect(vocalGainNode);
+            vocalBufferSource.loop = true; // Loop the vocal phrase
+            vocalBufferSource.start(0);
             playVocalBtn.textContent = '❚❚ Pause Echo';
-        } else {
-            loadAudioForTonalDrift(vocalLoops[currentVocalIndex].audioUrl).then(() => {
-                playVocalLoopWithWebAudio();
-            });
+        } catch (error) {
+            console.error("Error playing vocal loop:", error);
+            reflectionOutput.textContent = `Error playing vocal: ${error.message}. Check console.`;
         }
     }
 
-    // Function to pause audio (if using Web Audio API)
-    function pauseVocalLoopWithWebAudio() {
-        if (source) {
-            source.stop();
-            source.disconnect();
-            source = null;
+    // Function to pause vocal loop
+    function pauseVocalLoop() {
+        if (vocalBufferSource) {
+            vocalBufferSource.stop();
+            vocalBufferSource.disconnect();
+            vocalBufferSource = null;
             playVocalBtn.textContent = '▶ Play Echo';
+        }
+    }
+
+    // Function to play instrumental background music
+    async function playInstrumentalBackground() {
+        initAudioContext(); // Ensure context is initialized and resumed
+
+        if (instrumentalBufferSource) {
+            instrumentalBufferSource.stop();
+            instrumentalBufferSource.disconnect();
+            instrumentalBufferSource = null;
+        }
+
+        try {
+            const audioBuffer = await loadAudioBuffer(instrumentalAudioUrl);
+            instrumentalBufferSource = audioContext.createBufferSource();
+            instrumentalBufferSource.buffer = audioBuffer;
+            instrumentalBufferSource.connect(instrumentalGainNode);
+            instrumentalBufferSource.loop = true;
+            instrumentalBufferSource.start(0);
+            console.log("Instrumental background music started.");
+        } catch (error) {
+            console.error("Error playing instrumental background:", error);
+            // This error might occur if autoplay is blocked, or the URL is bad.
+            // We'll log it but not block the main module.
         }
     }
 
     // --- Event Listeners ---
     playVocalBtn.addEventListener('click', () => {
-        // Using simple HTML <audio> tag for playback for now
-        if (vocalAudio.paused) {
-            vocalAudio.src = vocalLoops[currentVocalIndex].audioUrl;
-            vocalAudio.play();
-            playVocalBtn.textContent = '❚❚ Pause Echo';
+        if (vocalBufferSource && audioContext.state === 'running') {
+            pauseVocalLoop();
         } else {
-            vocalAudio.pause();
-            playVocalBtn.textContent = '▶ Play Echo';
+            playVocalLoop();
         }
-        // If you want to switch to Web Audio API for tonal drift, uncomment the line below
-        // and comment out the simple audio tag logic above:
-        // playVocalLoopWithWebAudio();
     });
 
     nextVocalBtn.addEventListener('click', () => {
-        vocalAudio.pause(); // Pause current
-        playVocalBtn.textContent = '▶ Play Echo'; // Reset button text
+        pauseVocalLoop(); // Pause current before changing
         currentVocalIndex = (currentVocalIndex + 1) % vocalLoops.length;
         currentPhraseDisplay.textContent = vocalLoops[currentVocalIndex].text;
-        vocalAudio.src = vocalLoops[currentVocalIndex].audioUrl; // Update source for simple audio tag
-        // If using Web Audio API:
-        // pauseVocalLoopWithWebAudio();
-        // loadAudioForTonalDrift(vocalLoops[currentVocalIndex].audioUrl);
+        // No need to set vocalAudio.src if using Web Audio API
+        // playVocalLoop(); // Optionally auto-play next
     });
 
     nextGlyphBtn.addEventListener('click', () => {
@@ -141,12 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
     submitReflectionBtn.addEventListener('click', () => {
         const reflection = reflectionInput.value.trim();
         if (reflection) {
-            // This is where the "implied memory" logic would go.
-            // For this static HTML, we'll just display the reflection.
-            // In a real scenario, this would be sent to an AI for analysis.
             reflectionOutput.textContent = `Reflection received: "${reflection}"\n\n(This response would be analyzed by an AI for implied memory or continuity.)`;
             reflectionInput.value = ''; // Clear input
-            // Simulate a subtle AI response or prompt change
             reflectionInput.placeholder = "Does this pattern recall a deeper truth?";
         } else {
             reflectionOutput.textContent = "Please enter a reflection.";
@@ -157,10 +170,15 @@ document.addEventListener('DOMContentLoaded', () => {
     currentPhraseDisplay.textContent = vocalLoops[currentVocalIndex].text;
     currentGlyphDisplay.textContent = driftingGlyphs[currentGlyphIndex];
 
-    // Placeholder for instrumental background music (optional, requires separate audio file)
-    // const instrumentalAudio = document.createElement('audio');
-    // instrumentalAudio.src = "https://audio.com/anonymous/audio/system-flux-detected"; // Assuming this is your instrumental
-    // instrumentalAudio.loop = true;
-    // instrumentalAudio.volume = 0.3; // Adjust volume
-    // instrumentalAudio.play().catch(e => console.log("Instrumental auto-play blocked:", e)); // Autoplay might be blocked by browsers
+    // Attempt to play instrumental background music on user interaction (e.g., first click)
+    // This is a common pattern to bypass autoplay restrictions.
+    // We'll try to play it when the first vocal loop is played.
+    playVocalBtn.addEventListener('click', () => {
+        playInstrumentalBackground();
+    }, { once: true }); // Only run this listener once
+
+    // Also try to play instrumental on any user interaction with the document
+    document.body.addEventListener('click', () => {
+        playInstrumentalBackground();
+    }, { once: true });
 });
